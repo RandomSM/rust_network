@@ -7,31 +7,33 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     loop {
         let mut tasks = vec![];
 
-        // Simulate 100 users
+        // booucle servant a simuler 100 utilisateur
         for _ in 0..100 {
             let task = tokio::spawn(async {
-                // Connect to the server
+                // connection au serveur
                 let mut stream = TcpStream::connect("127.0.0.1:8080").await?;
 
-                // Data to send to the server
+                // message a envoyer
                 let data = "Hello, server!";
 
-                // Write data to the server
+                // écriture du essage en bytes au serveur
                 stream.write_all(data.as_bytes()).await?;
 
+                //print du message envoyer
                 println!("Sent: {}", data);
 
-                // Buffer to store received data
+                // Buffer pour recevoir la validation de la reception du message
                 let mut buffer = [0; 1024];
                 let mut received = Vec::new();
 
-                // Read the response from the server
+                // lecture de la réponse du serveur
                 let bytes_read = stream.read(&mut buffer).await?;
                 received.extend_from_slice(&buffer[..bytes_read]);
 
-                // Process and print the received data
+                // print de la réponse
                 if let Ok(response) = std::str::from_utf8(&received) {
                     println!("Received: {}", response);
+                    println!("Validation: Message received by the server");
                 } else {
                     println!("Received data is not valid UTF-8");
                 }
@@ -42,12 +44,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
             tasks.push(task);
         }
 
-        // Wait for all tasks to complete
+        // attente de la competion de toute les task
         for task in tasks {
-            task.await??; // Use `??` to propagate errors
+            task.await??; // `??` propagate errors
         }
 
-        // Delay execution by 1 second
+        // Delay l'execution de 1 sec
         tokio::time::sleep(Duration::from_secs(1)).await;
     }
 }
